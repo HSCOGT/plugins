@@ -46,7 +46,9 @@
 
 - (BOOL)addPayment:(SKPayment *)payment {
   for (SKPaymentTransaction *transaction in self.queue.transactions) {
-    if ([transaction.payment.productIdentifier isEqualToString:payment.productIdentifier]) {
+    if ([transaction.payment.productIdentifier isEqualToString:payment.productIdentifier] &&
+        (transaction.transactionState == SKPaymentTransactionStatePurchasing ||
+          transaction.transactionState == SKPaymentTransactionStateDeferred)) {
       return NO;
     }
   }
@@ -72,6 +74,30 @@
 // state of transactions and finish as appropriate.
 - (void)paymentQueue:(SKPaymentQueue *)queue
     updatedTransactions:(NSArray<SKPaymentTransaction *> *)transactions {
+      
+  // https://developer.apple.com/documentation/storekit/skpaymenttransactionstate
+  for (SKPaymentTransaction *transaction in transactions) {
+    switch (transaction.transactionState) {
+      case SKPaymentTransactionStatePurchasing:
+        NSLog(@"%@%@", @"SKPaymentTransactionStatePurchasing:", transaction.transactionIdentifier);
+        break;
+      case SKPaymentTransactionStatePurchased:
+        NSLog(@"%@%@", @"SKPaymentTransactionStatePurchased:", transaction.transactionIdentifier);
+        break;
+      case SKPaymentTransactionStateRestored:
+        [self.queue finishTransaction:transaction];
+        NSLog(@"%@%@", @"SKPaymentTransactionStateRestored:", transaction.transactionIdentifier);
+        break;
+      case SKPaymentTransactionStateDeferred:
+        NSLog(@"%@%@", @"SKPaymentTransactionStateDeferred:", transaction.transactionIdentifier);
+        break;
+      case SKPaymentTransactionStateFailed:
+        [self.queue finishTransaction:transaction];
+        NSLog(@"%@%@", @"SKPaymentTransactionStateFailed:", transaction.transactionIdentifier);
+        break;
+    }
+  }
+
   // notify dart through callbacks.
   self.transactionsUpdated(transactions);
 }
