@@ -18,8 +18,8 @@ final String kRestoredPurchaseErrorCode = 'restore_transactions_failed';
 /// [IAPError.code] code used when a consuming a purchased item fails.
 final String kConsumptionFailedErrorCode = 'consume_purchase_failed';
 
-final String _kPlatformIOS = 'ios';
-final String _kPlatformAndroid = 'android';
+// final String _kPlatformIOS = 'ios';
+// final String _kPlatformAndroid = 'android';
 
 /// Represents the data that is used to verify purchases.
 ///
@@ -185,7 +185,7 @@ class PurchaseDetails {
   /// The status that this [PurchaseDetails] is currently on.
   PurchaseStatus get status => _status;
   set status(PurchaseStatus status) {
-    if (_platform == _kPlatformIOS) {
+    /* if (_platform == _kPlatformIOS) {
       if (status == PurchaseStatus.purchased ||
           status == PurchaseStatus.error) {
         _pendingCompletePurchase = true;
@@ -195,6 +195,9 @@ class PurchaseDetails {
       if (status == PurchaseStatus.purchased) {
         _pendingCompletePurchase = true;
       }
+    } */
+    if (status == PurchaseStatus.purchased) {
+      _pendingCompletePurchase = true;
     }
     _status = status;
   }
@@ -227,7 +230,7 @@ class PurchaseDetails {
   // The platform that the object is created on.
   //
   // The value is either '_kPlatformIOS' or '_kPlatformAndroid'.
-  String? _platform;
+  // String? _platform;
 
   /// Creates a new PurchaseDetails object with the provided data.
   PurchaseDetails({
@@ -252,8 +255,7 @@ class PurchaseDetails {
             ? (transaction.transactionTimeStamp! * 1000).toInt().toString()
             : null,
         this.skPaymentTransaction = transaction,
-        this.billingClientPurchase = null,
-        _platform = _kPlatformIOS {
+        this.billingClientPurchase = null {
     status = SKTransactionStatusConverter()
         .toPurchaseStatus(transaction.transactionState);
     if (status == PurchaseStatus.error) {
@@ -276,8 +278,7 @@ class PurchaseDetails {
             source: IAPSource.GooglePlay),
         this.transactionDate = purchase.purchaseTime.toString(),
         this.skPaymentTransaction = null,
-        this.billingClientPurchase = purchase,
-        _platform = _kPlatformAndroid {
+        this.billingClientPurchase = purchase {
     status = PurchaseStateConverter().toPurchaseStatus(purchase.purchaseState);
     if (status == PurchaseStatus.error) {
       error = IAPError(
